@@ -6,9 +6,19 @@ import { api } from "~/utils/api";
 
 
 export default function Home() {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
 
   const user = useUser();
+
+  /*
+  Can bring us to the backend code from the frontend
+
+  Two different files, run in two different places. One runs on the user's
+  device. The other runs on our servers. We can go back and forth between the
+  two like they are on the same machine.
+  */
+  const {data} = api.posts.getAll.useQuery();
+  
+
   
   return (
     <>
@@ -21,6 +31,13 @@ export default function Home() {
         <div>
           {!user.isSignedIn && <SignInButton/>}
           {!!user.isSignedIn && <SignOutButton/>}
+        </div>
+        <div>
+          {/*Keys are a way that react uses to identify what should or shouldn't 
+          be updated. Keep amount of time to render down slightly */}
+          {data?.map((post) => (
+            <div key={post.id}>{post.content}</div>
+          ))}
         </div>
         <SignIn path="/sign-in" routing="path" signUpUrl="/sign-up" />
       </main>
