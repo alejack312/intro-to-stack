@@ -1,9 +1,6 @@
-import Image from "next/image";
 import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import { api } from "~/utils/api";
-import type  { RouterOutputs } from "~/utils/api";
 import { generateSSGHelper } from "~/server/helpers/ssghelper";
 import { PageLayout } from "~/components/layout";
 import { PostView } from "~/components/postview";
