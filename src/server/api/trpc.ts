@@ -11,6 +11,8 @@ import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { prisma } from "~/server/db";
+import { getAuth } from "@clerk/nextjs/server";
+import { TRPCError } from "@trpc/server";
 
 /**
  * 1. CONTEXT
@@ -20,23 +22,6 @@ import { prisma } from "~/server/db";
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
 
-type CreateContextOptions = Record<string, never>;
-
-/**
- * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
- * it from here.
- *
- * Examples of things you may need it for:
- * - testing, so we don't have to mock Next.js' req/res
- * - tRPC's `createSSGHelpers`, where we don't have req/res
- *
- * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
- */
-const createInnerTRPCContext = (_opts: CreateContextOptions) => {
-  return {
-    prisma,
-  };
-};
 
 /**
  * This is the actual context you will use in your router. It will be used to process every request
@@ -44,8 +29,31 @@ const createInnerTRPCContext = (_opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = (_opts: CreateNextContextOptions) => {
-  return createInnerTRPCContext({});
+export const createTRPCContext = (opts: CreateNextContextOptions) => {
+
+  //No longer gonna underscore escape opts because we actually want to use it.
+  //^ Research further
+
+  // This is a nextjs request from an API which you can actually pass to stuff 
+  // in clerk
+  const {req} = opts;
+
+  /*
+  Since clerk is using JWTs, it is able to verify authentication on your server
+  using the signature of the JWT, allowing them to skip a callback to their server
+  just to verify that the user is authenticated. This lets us know for sure that 
+  this is this user and gives us a little bit of info about them, specifically
+  signedin signedout objects which tell us if they are signed in or out.
+  */
+
+  const sesh = getAuth(req);
+
+  const userId = sesh.userId;
+
+  return {
+    prisma,
+    userId,
+  };
 };
 
 /**
@@ -92,3 +100,27 @@ export const createTRPCRouter = t.router;
  * are logged in.
  */
 export const publicProcedure = t.procedure;
+
+/** 
+ * We won't always necessarily have auth but we can make a procedure that enforces
+ * that we do. Easiest way to do that is to extend the public procedure with a new middleware.
+ * It's not the same as a middleware in nextjs that runs on an edge function. It is
+ * just a process that runs before the main request processing. Super helpful for things like
+ * attaching auth and making sure users are actually authenticated.
+ * 
+ * We attached auth earlier so we will simply verify here.
+*/
+const enforceUserIsAuthed = t.middleware(async ({ctx, next}) => {
+  if(!ctx.userId) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Not authenticated"});
+  }
+  return next({
+    ctx: {
+      userId: ctx.userId,
+    },
+  });
+});
+
+export const privateProcedure = t.procedure.use(enforceUserIsAuthed);

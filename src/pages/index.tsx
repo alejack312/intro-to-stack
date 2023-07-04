@@ -9,6 +9,7 @@ import type  { RouterOutputs } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { LoadingPage } from "~/components/loading";
+import { useState } from "react";
 
 dayjs.extend(relativeTime);
 
@@ -16,8 +17,23 @@ const CreatePostWizard = () => {
   //Get user info
   const {user} = useUser();
 
+  const [input, setInput] = useState("");
 
-  console.log(user);
+  //When we post, we wanted to update the post on the screen. To do this, we 
+  //grab the context of the whole TRPC cache through the api context call.
+  const ctx = api.useContext();
+
+  const {mutate, isLoading: isPosting} = api.posts.create.useMutation({
+    //When a user hits post, we clear the text box
+    onSuccess: () => {
+      setInput("");
+      //Updating feed when post gets posted.
+      void ctx.posts.getAll.invalidate();
+    }
+  });
+
+
+  console.log(user);  
 
   //If no user, return null for now
   if(!user) return null;
@@ -35,8 +51,13 @@ const CreatePostWizard = () => {
       />
       <input 
         placeholder="Write something here!"
-        className="grow bg-transparent"
+        className="grow bg-transparent outline-none"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        // Wanna make sure input is disabled while a post is occuring
+        disabled={isPosting}
       />
+      <button onClick={() => mutate({content: input})}> Post </button> 
     </div>
   );
 };
@@ -72,7 +93,7 @@ const PostView = (props: PostWithUser) => {
               {` · ${dayjs(post.createdAt).fromNow()}`} 
             </span>
           </div>
-            <span>
+            <span className="text-l">
               {post.content}
             </span>
         </div>
@@ -94,7 +115,7 @@ const Feed = () => {
       be updated. Keep amount of time to render down slightly */
 
     <div className="flex flex-col">
-      {[...data, ...data]?.map((fullPost) => (
+      {data.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id}/>
       ))}
     </div>
