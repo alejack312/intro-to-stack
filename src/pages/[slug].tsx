@@ -8,36 +8,40 @@ import Image from "next/image";
 import { LoadingPage } from "~/components/loading";
 import { PostView } from "~/components/postview";
 import { generateSSGHelper } from "~/server/helpers/ssghelper";
+import { fdatasync } from "fs";
 
 const ProfileFeed = (props: {userId: string}) => {
 
-    const {data, isLoading} = api.posts.getPostsByUserId.useQuery({userId: props.userId})
+  const {data, isLoading} = api.posts.getPostsByUserId.useQuery({
+    userId: props.userId,
+  });
 
-    if(isLoading) return <LoadingPage/>
+  if(isLoading) return <LoadingPage />
 
-    if(!data || data.length === 0) return <div>User has not posted.</div>
+  if(!data || data.length === 0) return <div>User has not posted.</div>
 
-    return (
-      <div className="flex flex-col">
-        {data.map(fullPost => (
-          <PostView {...fullPost} key={fullPost.post.id} />))}
-      </div>
-    )
-}
+  return (
+    <div className="flex flex-col">
+      {data.map(fullPost => (
+        <PostView {...fullPost} key={fullPost.post.id} />
+      ))}
+    </div>
+  );
+};
 
-const ProfilePage: NextPage<{username: string}> = ({username}) => {
+const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
 
-  const {data} = api.profile.getUserByUsername.useQuery({
+  const { data } = api.profile.getUserByUsername.useQuery({
     username,
   });
   
 
-  if(!data) return <div>404</div>
+  if (!data) return <div>404</div>
 
   return (
     <>
       <Head>
-        <title>{data.username}</title>
+        <title>{data.username ?? ""}</title>
       </Head>
       <PageLayout>
         {/* If we want to have a background image, we would set it here */}
@@ -47,9 +51,7 @@ const ProfilePage: NextPage<{username: string}> = ({username}) => {
             alt={`@${data.username}'s profile picture`} 
             width={120}
             height={120}
-
-            className="absolute bottom-0 left-0 -mb-[60px] ml-8 rounded-full
-            border-4 border-black"
+            className="absolute bottom-0 left-0 -mb-[60px] ml-8 rounded-full border-4 border-black"
           />
         </div>
         <div className="h-[80px]"></div>

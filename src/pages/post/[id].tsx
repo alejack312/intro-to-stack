@@ -25,7 +25,7 @@ return (
       <title>{`${data.post.content} - @${data.author.username}`}</title>
     </Head>
     <PageLayout>
-      <PostView {...data} />
+      <PostView {...data} /> 
       
     </PageLayout>
   </>
