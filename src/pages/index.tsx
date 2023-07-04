@@ -1,4 +1,4 @@
-import {SignInButton, useUser } from "@clerk/nextjs";
+import {SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 
 
@@ -10,9 +10,6 @@ import { useState } from "react";
 import {toast} from "react-hot-toast";
 import { PageLayout } from "~/components/layout";
 import { PostView } from "~/components/postview";
-
-
-
 
 
 const CreatePostWizard = () => {
@@ -52,15 +49,23 @@ const CreatePostWizard = () => {
 
   //By this point we should have a user because we checked above
   return (
-    
+
     <div className="flex w-full gap-4">
-      <Image 
+      {/* <Image 
         src={user.profileImageUrl} 
         alt="Profile image" 
         className="h-14 w-14 rounded-full"
         width={56}
         height={56}
-      />
+      /> */}
+      <UserButton appearance={{
+        elements: {
+          userButtonAvatarBox: {
+            width: 56,
+            height: 56
+          }
+        }
+      }} />
       <input 
         placeholder="Let us know what you think!"
         className="grow bg-transparent outline-none"
