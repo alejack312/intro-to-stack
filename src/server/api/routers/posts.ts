@@ -76,7 +76,7 @@ export const postsRouter = createTRPCRouter({
   //Zod: Use to type-check data essentially
   create: privateProcedure.input(
     z.object({
-        content: z.string().min(1).max(500),
+        content: z.string().min(3, { message: "Post must be 3 or more characters long." }).max(500),
     })).mutation(async({ctx, input}) => {
     const authorId = ctx.userId;
 
