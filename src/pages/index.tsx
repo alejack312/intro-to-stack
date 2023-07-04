@@ -150,7 +150,7 @@ export default function Home() {
 
         <Feed />
 
-        <div className="flex items-center justify-between p-4 text-xl">
+        {/* <div className="flex items-center justify-between p-4 text-xl">
         <a href="www.theouttapocketpodcast.com">
           <div className="flex items-center justify-center gap-2">
             <svg
@@ -168,7 +168,7 @@ export default function Home() {
         <span>
           <a href="www.theouttapocketpodcast.com">YouTube</a>
         </span>
-      </div>
+      </div> */}
 
     </PageLayout>
   );
