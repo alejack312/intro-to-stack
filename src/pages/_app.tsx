@@ -2,13 +2,18 @@ import { type AppType } from "next/app";
 import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
+import { dark } from "@clerk/themes";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "react-hot-toast";
 import Head from "next/head";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
-    <ClerkProvider {...pageProps}>
+    <ClerkProvider 
+      // appearance={{
+      //   baseTheme: dark
+      // }}
+      {...pageProps}>
       <Head>
         <title>The Pocket</title>
         <meta name="description" content="We could all use a little time outside of The Pocket…" />
