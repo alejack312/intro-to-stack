@@ -1,18 +1,13 @@
-import {SignIn, SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
-import Image from "next/image";
-
+import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
+
 import { api } from "~/utils/api";
-import type  { RouterOutputs } from "~/utils/api";
-import { appRouter } from "~/server/api/root";
-import { createServerSideHelpers } from '@trpc/react-query/server';
-import superjson from 'superjson';
-import { prisma } from "~/server/db";
-import { GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
+
 import { PageLayout } from "~/components/layout";
+import Image from "next/image";
 import { LoadingPage } from "~/components/loading";
 import { PostView } from "~/components/postview";
+import { generateSSGHelper } from "~/server/helpers/ssghelper";
 
 const ProfileFeed = (props: {userId: string}) => {
 
@@ -68,15 +63,10 @@ const ProfilePage: NextPage<{username: string}> = ({username}) => {
   );
 };
 
-export default ProfilePage;
 
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  const ssg = createServerSideHelpers({
-    router: appRouter,
-    ctx: {prisma, userId: null},
-    transformer: superjson, // optional - adds superjson serialization
-  });
+  const ssg = generateSSGHelper();
 
   const slug = context.params?.slug;
   
@@ -84,7 +74,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   const username = slug.replace("@", "");
 
-  await ssg.profile.getUserByUsername.prefetch({username: slug});
+  await ssg.profile.getUserByUsername.prefetch({username});
 
 
   return {
@@ -99,4 +89,5 @@ export const getStaticPaths = () => {
   return {paths: [], fallback: "blocking"};
 };
 
+export default ProfilePage;
 
