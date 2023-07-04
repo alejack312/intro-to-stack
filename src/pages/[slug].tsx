@@ -46,16 +46,18 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
         <div className="relative h-48 bg-blue-850">
           <Image
             src={data.profileImageUrl} 
-            alt={`@${data.username ?? data.externalUsername}'s profile picture`} 
+            alt={`${
+              data.username ?? data.externalUsername ?? "unknown"
+            }'s profile pic`}
             width={120}
             height={120}
             className="absolute bottom-0 left-0 -mb-[60px] ml-8 rounded-full border-4 border-black"
           />
         </div>
         <div className="h-[80px]"></div>
-        <div className="p-4 text-2xl font-bold">
-          {`@${data.username ?? data.externalUsername}`}
-        </div>
+        <div className="p-4 text-2xl font-bold">{`@${
+          data.username ?? data.externalUsername ?? "unknown"
+        }`}</div>
         <div className="border-b border-slate-400 w-full" />
         <ProfileFeed userId={data.id}/>
       </PageLayout>
