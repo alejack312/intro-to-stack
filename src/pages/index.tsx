@@ -45,7 +45,6 @@ const CreatePostWizard = () => {
   });
 
 
-  console.log(user);  
 
   //If no user, return null for now
   if(!user) return null;
@@ -53,6 +52,7 @@ const CreatePostWizard = () => {
 
   //By this point we should have a user because we checked above
   return (
+    
     <div className="flex w-full gap-4">
       <Image 
         src={user.profileImageUrl} 

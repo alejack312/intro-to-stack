@@ -36,18 +36,17 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
   
 
   if (!data) return <div>404</div>
-
   return (
     <>
       <Head>
-        <title>{data.username ?? ""}</title>
+        <title>{data.username ?? data.externalUsername}</title>
       </Head>
       <PageLayout>
         {/* If we want to have a background image, we would set it here */}
         <div className="relative h-48 bg-blue-850">
           <Image
             src={data.profileImageUrl} 
-            alt={`@${data.username}'s profile picture`} 
+            alt={`@${data.username ?? data.externalUsername}'s profile picture`} 
             width={120}
             height={120}
             className="absolute bottom-0 left-0 -mb-[60px] ml-8 rounded-full border-4 border-black"
@@ -55,7 +54,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
         </div>
         <div className="h-[80px]"></div>
         <div className="p-4 text-2xl font-bold">
-          {`@${data.username ?? ""}`}
+          {`@${data.username ?? data.externalUsername}`}
         </div>
         <div className="border-b border-slate-400 w-full" />
         <ProfileFeed userId={data.id}/>

@@ -1,11 +1,7 @@
 import { clerkClient } from "@clerk/nextjs";
 import { z } from "zod";
-
 import { createTRPCRouter, privateProcedure, publicProcedure } from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
-
-
-
 import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
 import { Redis } from "@upstash/redis";
 import { filterUserForClient } from "~/server/helpers/filterUserForClient";
@@ -13,28 +9,45 @@ import { Post } from "@prisma/client";
 
 
 const addUserDataToPosts = async (posts: Post []) => {
+
+    const userId = posts.map((post) => post.authorId);
+
     //We need more data, specifically, the user profile image url. We will use
     //the clerk client
     const users = (
         await clerkClient.users.getUserList({
-            userId: posts.map((post) => post.authorId),
+            //userId: posts.map((post) => post.authorId),
+            userId: userId,
             limit: 100,
         })
     ).map(filterUserForClient);
 
     return posts.map((post) => {
+
         const author = users.find((user) => user.id == post.authorId);
 
-        if(!author || !author.username) 
+        if(!author) {
             throw new TRPCError({
                 code: "INTERNAL_SERVER_ERROR",
-                message: "Author for post not found",
+                // Post author id in errors
+                message: `Author for post not found. POST ID: ${post.id}, USER ID: ${post.authorId}`,
             });
+        }
+        if(!author.username) {
+            //user the ExternalUsername
+            if(!author.externalUsername) {
+                throw new TRPCError({
+                    code:"INTERNAL_SERVER_ERROR",
+                    message: `Author has no authorized account: ${author.id}`,
+                });
+            }
+            author.username = author.externalUsername;
+        }
         return {
             post,
             author: {
                 ...author,
-                username: author.username,
+                username: author.username ?? "(username not found)",
             },
         };
     });

@@ -5,5 +5,6 @@ export const filterUserForClient = (user: User) => {
         id: user.id, 
         username: user.username, 
         profileImageUrl: user.profileImageUrl,
+        externalUsername: user.externalAccounts[0]?.username
     };
 };
